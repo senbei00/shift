@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>シフト管理</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="appHeader">
+    <div>
+      <h1>シフト管理</h1>
+      <p>勤務記録・時間計算・週/月合計</p>
+    </div>
+    <div class="topControls">
+      <div class="authBox">
+        <span id="authStatus">未ログイン</span>
+        <button id="loginBtn">Googleログイン</button>
+        <button id="logoutBtn" hidden>ログアウト</button>
+      </div>
+      <div class="monthNav">
+        <button id="prevMonth">‹</button>
+        <button id="todayBtn">今日</button>
+        <button id="nextMonth">›</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="calendarPanel card">
+      <div class="panelHead">
+        <h2 id="monthTitle"></h2>
+        <button id="openAddShift" class="primary">＋ シフト追加</button>
+      </div>
+      <div class="weekLabels">
+        <span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span>
+      </div>
+      <div id="calendarGrid" class="calendarGrid"></div>
+    </section>
+
+    <aside class="side">
+      <section class="card accordion open" data-section="salary">
+        <button type="button" class="accordionHead"><span>給与計算</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <div id="wageSettings" class="wageSettings"></div>
+          <div class="summaryLine strong"><span>月給目安</span><b id="monthSalary">¥0</b></div>
+        </div>
+      </section>
+
+      <section class="card accordion open" data-section="selected">
+        <button type="button" class="accordionHead"><span>選択日</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <p id="selectedDate" class="selectedDate"></p>
+          <div class="summaryLine"><span>勤務</span><b id="dayWork">0時間0分</b></div>
+          <div class="summaryLine"><span>休憩</span><b id="dayBreak">0時間0分</b></div>
+          <div id="selectedShiftList" class="shiftList"></div>
+        </div>
+      </section>
+
+      <section class="card accordion open" data-section="week">
+        <button type="button" class="accordionHead"><span>週間合計</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <select id="weekMode">
+            <option value="sun">日〜土</option>
+            <option value="mon">月〜日</option>
+          </select>
+          <div id="weekRangeLabel" class="selectedDate"></div>
+          <div class="summaryLine strong"><span>今週の勤務</span><b id="weekWork">0時間0分</b></div>
+          <div class="summaryLine"><span>今週の休憩</span><b id="weekBreak">0時間0分</b></div>
+          <div id="weekList" class="weekList"></div>
+        </div>
+      </section>
+
+      <section class="card accordion open" data-section="month">
+        <button type="button" class="accordionHead"><span>月間合計</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <div class="summaryLine strong"><span>総勤務</span><b id="monthWork">0時間0分</b></div>
+          <div class="summaryLine"><span>総休憩</span><b id="monthBreak">0時間0分</b></div>
+          <div id="monthByPlace" class="placeTotals"></div>
+        </div>
+      </section>
+
+      <section class="card accordion" data-section="places">
+        <button type="button" class="accordionHead"><span>勤務先設定</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <button id="addPlace">＋ 追加</button>
+          <div id="placeSettings"></div>
+        </div>
+      </section>
+
+      <section class="card accordion" data-section="data">
+        <button type="button" class="accordionHead"><span>データ</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <div class="dataActions">
+            <button id="backupBtn">バックアップ</button>
+            <button id="resetBtn" class="danger">全データ削除</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<dialog id="shiftDialog">
+  <form class="modal" method="dialog">
+    <div class="modalHead">
+      <h2 id="modalTitle">シフト追加</h2>
+      <button type="button" id="closeDialog" class="iconBtn">×</button>
+    </div>
+    <input type="hidden" id="editIndex">
+    <label>勤務先<select id="placeSelect"></select></label>
+    <datalist id="timeOptions"></datalist>
+    <div class="twoCol">
+      <label>開始<input id="startTime" type="text" inputmode="numeric" maxlength="5" placeholder="09:00" list="timeOptions"></label>
+      <label>終了<input id="endTime" type="text" inputmode="numeric" maxlength="5" placeholder="18:00" list="timeOptions"></label>
+    </div>
+    <label>休憩時間（分）<input id="breakMinutes" type="number" min="0" step="5" value="0"></label>
+    <label>メモ<input id="memo" type="text" placeholder="任意入力"></label>
+
+    <div class="copyActions">
+      <button type="button" id="openPresetPicker">よく使う時間</button>
+      <button type="button" id="openHistoryPicker">履歴からコピー</button>
+    </div>
+    <div class="copyActions one">
+      <button type="button" id="saveAsPreset">この時間を固定</button>
+    </div>
+
+    <div class="calcBox"><span>計算</span><b id="calcWork">0時間0分</b></div>
+    <div class="actions">
+      <button type="button" id="deleteShift" class="danger">削除</button>
+      <button type="button" id="saveShift" class="primary">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="historyDialog">
+  <form class="modal wideModal" method="dialog">
+    <div class="modalHead">
+      <h2>履歴からコピー</h2>
+      <button type="button" id="closeHistory" class="iconBtn">×</button>
+    </div>
+    <div id="historyList" class="pickerList"></div>
+  </form>
+</dialog>
+
+<dialog id="presetDialog">
+  <form class="modal wideModal" method="dialog">
+    <div class="modalHead">
+      <h2>よく使う時間</h2>
+      <button type="button" id="closePreset" class="iconBtn">×</button>
+    </div>
+    <div id="presetList" class="pickerList"></div>
+  </form>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
