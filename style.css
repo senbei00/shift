@@ -173,3 +173,76 @@ dialog::backdrop{background:rgba(15,20,30,.32)}
     grid-template-columns:1fr;
   }
 }
+
+/* layout fix */
+.calendarTitleRow{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+  min-width:0;
+}
+.topSummary{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.summaryChip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:8px 12px;
+  background:#fff;
+  min-height:38px;
+}
+.summaryChip span{
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+}
+.summaryChip b{
+  font-size:15px;
+  white-space:nowrap;
+}
+.dataActions{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+.dataActions button{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.day.saturday .dateNumber,
+.day.saturday .dayNum > span:first-child{
+  color:var(--blue) !important;
+}
+.day.sunday .dateNumber,
+.day.sunday .dayNum > span:first-child{
+  color:var(--danger) !important;
+}
+.day.holiday .dateNumber,
+.day.holiday .dayNum > span:first-child{
+  color:var(--danger) !important;
+}
+@media(max-width:700px){
+  .calendarTitleRow{
+    width:100%;
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .topSummary{
+    width:100%;
+  }
+  .summaryChip{
+    flex:1;
+    justify-content:space-between;
+  }
+  .dataActions{
+    grid-template-columns:1fr !important;
+  }
+}

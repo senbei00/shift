@@ -514,6 +514,8 @@ function renderSide(){
   $("monthBreak").textContent = minuteText(totalBreak);
   const salaryTotal = Object.values(byPlace).reduce((sum,total) => sum + (total.work / 60) * Number(total.wage || 0), 0);
   $("monthSalary").textContent = yen(salaryTotal);
+  if($("topMonthSalary")) $("topMonthSalary").textContent = yen(salaryTotal);
+  if($("topMonthWork")) $("topMonthWork").textContent = minuteText(totalWork);
   renderWageSettings();
 
   const placeBox = $("monthByPlace");

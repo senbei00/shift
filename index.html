@@ -30,7 +30,13 @@
   <main class="layout">
     <section class="calendarPanel card">
       <div class="panelHead">
-        <h2 id="monthTitle"></h2>
+        <div class="calendarTitleRow">
+          <h2 id="monthTitle"></h2>
+          <div class="topSummary">
+            <div class="summaryChip"><span>月給目安</span><b id="topMonthSalary">¥0</b></div>
+            <div class="summaryChip"><span>月間合計</span><b id="topMonthWork">0時間0分</b></div>
+          </div>
+        </div>
         <button id="openAddShift" class="primary">＋ シフト追加</button>
       </div>
       <div class="weekLabels">
@@ -40,15 +46,7 @@
     </section>
 
     <aside class="side">
-      <section class="card accordion open" data-section="salary">
-        <button type="button" class="accordionHead"><span>給与計算</span><span class="chev">⌄</span></button>
-        <div class="accordionBody">
-          <div id="wageSettings" class="wageSettings"></div>
-          <div class="summaryLine strong"><span>月給目安</span><b id="monthSalary">¥0</b></div>
-        </div>
-      </section>
-
-      <section class="card accordion open" data-section="selected">
+<section class="card accordion open" data-section="selected">
         <button type="button" class="accordionHead"><span>選択日</span><span class="chev">⌄</span></button>
         <div class="accordionBody">
           <p id="selectedDate" class="selectedDate"></p>
@@ -58,7 +56,17 @@
         </div>
       </section>
 
-      <section class="card accordion open" data-section="week">
+      
+<section class="card accordion open" data-section="salary">
+        <button type="button" class="accordionHead"><span>給与計算</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <div id="wageSettings" class="wageSettings"></div>
+          <div class="summaryLine strong"><span>月給目安</span><b id="monthSalary">¥0</b></div>
+        </div>
+      </section>
+
+      
+<section class="card accordion open" data-section="week">
         <button type="button" class="accordionHead"><span>週間合計</span><span class="chev">⌄</span></button>
         <div class="accordionBody">
           <select id="weekMode">
@@ -72,7 +80,8 @@
         </div>
       </section>
 
-      <section class="card accordion open" data-section="month">
+      
+<section class="card accordion open" data-section="month">
         <button type="button" class="accordionHead"><span>月間合計</span><span class="chev">⌄</span></button>
         <div class="accordionBody">
           <div class="summaryLine strong"><span>総勤務</span><b id="monthWork">0時間0分</b></div>
@@ -81,7 +90,8 @@
         </div>
       </section>
 
-      <section class="card accordion" data-section="places">
+      
+<section class="card accordion" data-section="places">
         <button type="button" class="accordionHead"><span>勤務先設定</span><span class="chev">⌄</span></button>
         <div class="accordionBody">
           <button id="addPlace">＋ 追加</button>
@@ -89,7 +99,8 @@
         </div>
       </section>
 
-      <section class="card accordion" data-section="data">
+      
+<section class="card accordion" data-section="data">
         <button type="button" class="accordionHead"><span>データ</span><span class="chev">⌄</span></button>
         <div class="accordionBody">
           <div class="dataActions">
@@ -101,6 +112,7 @@
           <input id="importFile" type="file" accept="application/json,.json" onchange="window.handleImportFile && window.handleImportFile(this.files[0])" hidden>
         </div>
       </section>
+    
     </aside>
   </main>
 </div>
