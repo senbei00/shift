@@ -312,3 +312,73 @@ dialog::backdrop{background:rgba(15,20,30,.32)}
     padding-top:0;
   }
 }
+
+/* mobile calendar fix */
+.saturdayText{
+  color:var(--blue) !important;
+}
+.sundayText{
+  color:var(--danger) !important;
+}
+
+@media(max-width:700px){
+  .calendarGrid{
+    grid-auto-rows:1fr;
+  }
+  .day{
+    min-height:auto !important;
+    aspect-ratio:1 / 1;
+    padding:5px;
+    position:relative;
+  }
+  .day.saturday{
+    background:#f4f8ff !important;
+  }
+  .day.saturday.other{
+    background:#f1f6ff !important;
+  }
+  .day.sunday{
+    background:#fff5f5 !important;
+  }
+  .day.sunday.other{
+    background:#fff1f1 !important;
+  }
+  .day.holiday{
+    background:#fff0f0 !important;
+  }
+  .day.holiday.other{
+    background:#fff0f0 !important;
+  }
+  .dayNum{
+    margin-bottom:4px;
+    align-items:flex-start;
+  }
+  .dateNumber{
+    font-size:15px;
+    line-height:1;
+  }
+  .holidayText{
+    font-size:8px;
+    line-height:1.1;
+    max-width:100%;
+  }
+  .shiftChip{
+    display:inline-block;
+    width:9px;
+    height:9px;
+    min-width:9px;
+    min-height:9px;
+    padding:0;
+    margin:2px 2px 0 0;
+    border:0 !important;
+    border-radius:50%;
+    vertical-align:top;
+    overflow:hidden;
+  }
+  .shiftChip strong{
+    display:none;
+  }
+  .shiftChip:nth-of-type(n+5){
+    display:none;
+  }
+}

@@ -194,7 +194,13 @@ let selected = startOfDay(new Date());
 function startOfDay(date){ const d = new Date(date); d.setHours(0,0,0,0); return d; }
 function key(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; }
 function monthFileKey(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`; }
-function dateText(date){ return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日`; }
+function weekdayLabel(date){ return ["日","月","火","水","木","金","土"][date.getDay()]; }
+function dateText(date){ return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日（${weekdayLabel(date)}）`; }
+function selectedDateClass(date){
+  if(holidayName(date) || date.getDay() === 0) return "selectedDate sundayText";
+  if(date.getDay() === 6) return "selectedDate saturdayText";
+  return "selectedDate";
+}
 function md(date){ return `${date.getMonth()+1}/${date.getDate()}`; }
 
 function memoKey(date){ return MEMO_PREFIX + monthFileKey(date); }
@@ -479,6 +485,7 @@ function renderCalendar(){
 }
 function renderSide(){
   $("selectedDate").textContent = dateText(selected);
+  $("selectedDate").className = selectedDateClass(selected);
   $("dayWork").textContent = minuteText(dayWork(selected));
   $("dayBreak").textContent = minuteText(dayBreak(selected));
 
