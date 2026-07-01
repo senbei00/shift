@@ -382,3 +382,28 @@ dialog::backdrop{background:rgba(15,20,30,.32)}
     display:none;
   }
 }
+
+/* Mobile dot contrast + other month weekends */
+@media(max-width:700px){
+  .shiftChip{
+    opacity:1 !important;
+    box-shadow:0 0 0 1px rgba(0,0,0,.08);
+  }
+  .shiftChip.place-0{background:#22c55e!important;}
+  .shiftChip.place-1{background:#ef4444!important;}
+  .shiftChip.place-2{background:#f59e0b!important;}
+  .shiftChip.place-3{background:#7c3aed!important;}
+
+  /* previous/next month dates stay gray even if weekend */
+  .day.other{
+    background:#fafafa!important;
+  }
+  .day.other .dateNumber,
+  .day.other .holidayText{
+    color:#b7bec9!important;
+  }
+  .day.other .shiftChip{
+    opacity:.65!important;
+    box-shadow:none;
+  }
+}

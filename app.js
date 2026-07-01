@@ -396,13 +396,19 @@ function fillTimeOptions(){
     }
   }
 }
+function normalizeDigits(value){
+  return String(value || "")
+    .replace(/[０-９]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xFEE0))
+    .replace(/[：]/g, ":");
+}
+
 function normalizeTime(value){
-  const raw = String(value || "").trim();
-  if(/^\\d{1,2}:\\d{2}$/.test(raw)){
+  const raw = normalizeDigits(value).trim();
+  if(/^\d{1,2}:\d{2}$/.test(raw)){
     let [h,m] = raw.split(":").map(Number);
     if(h >= 0 && h <= 23 && m >= 0 && m <= 59) return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
   }
-  if(/^\\d{3,4}$/.test(raw)){
+  if(/^\d{3,4}$/.test(raw)){
     const padded = raw.padStart(4,"0");
     const h = Number(padded.slice(0,2));
     const m = Number(padded.slice(2,4));
@@ -514,8 +520,11 @@ function renderSide(){
   const mode = $("weekMode").value;
   const wr = weekRange(selected, mode);
   $("weekRangeLabel").textContent = `${selectedWeekIndex(mode)}週目・${md(wr.start)} 〜 ${md(wr.end)}`;
-  $("weekWork").textContent = minuteText(rangeTotal(wr.start, wr.end, "work"));
-  $("weekBreak").textContent = minuteText(rangeTotal(wr.start, wr.end, "break"));
+  const selectedWeekWork = rangeTotal(wr.start, wr.end, "work");
+  const selectedWeekBreak = rangeTotal(wr.start, wr.end, "break");
+  $("weekWork").textContent = minuteText(selectedWeekWork);
+  $("weekBreak").textContent = minuteText(selectedWeekBreak);
+  if($("topMonthWork")) $("topMonthWork").textContent = minuteText(selectedWeekWork);
 
   const weekList = $("weekList");
   weekList.innerHTML = "";
@@ -552,7 +561,7 @@ function renderSide(){
   $("monthSalary").textContent = yen(salaryTotal);
   updateTopSummary(totalWork, salaryTotal);
   if($("topMonthSalary")) $("topMonthSalary").textContent = yen(salaryTotal);
-  if($("topMonthWork")) $("topMonthWork").textContent = minuteText(totalWork);
+  
   renderWageSettings();
 
   const placeBox = $("monthByPlace");
