@@ -848,6 +848,7 @@ function initAccordions(){
   });
 }
 
+window.handleImportFile = handleImportFile;
 fillTimeOptions();
 initAccordions();
 
@@ -879,6 +880,7 @@ $("addPlace").onclick = () => {
   renderAll();
 };
 $("backupBtn").onclick = backup;
+$("cloudSaveBtn").onclick = () => { syncCloud(); alert("現在のデータをクラウドへ保存しました。"); };
 $("importBtn").onclick = () => $("importFile").click();
 $("importFile").onchange = e => handleImportFile(e.target.files[0]);
 $("resetBtn").onclick = () => {

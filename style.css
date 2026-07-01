@@ -164,3 +164,12 @@ dialog::backdrop{background:rgba(15,20,30,.32)}
     grid-template-columns:1fr;
   }
 }
+
+.dataActions{
+  grid-template-columns:1fr 1fr 1fr 1fr;
+}
+@media(max-width:700px){
+  .dataActions{
+    grid-template-columns:1fr;
+  }
+}

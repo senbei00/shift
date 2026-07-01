@@ -94,10 +94,11 @@
         <div class="accordionBody">
           <div class="dataActions">
             <button id="backupBtn">バックアップ</button>
-            <button id="importBtn">インポート</button>
+            <button id="importBtn" type="button" onclick="document.getElementById('importFile').click()">インポート</button>
+            <button id="cloudSaveBtn" type="button">クラウドへ保存</button>
             <button id="resetBtn" class="danger">全データ削除</button>
           </div>
-          <input id="importFile" type="file" accept="application/json,.json" hidden>
+          <input id="importFile" type="file" accept="application/json,.json" onchange="window.handleImportFile && window.handleImportFile(this.files[0])" hidden>
         </div>
       </section>
     </aside>
