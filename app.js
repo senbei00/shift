@@ -196,9 +196,9 @@ function activePlaces(){
   const names = places().map(p => p.name);
   const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || "null");
   if(!Array.isArray(saved)) return names;
-  const filtered = saved.filter(name => names.includes(name));
-  return filtered.length ? filtered : names;
+  return saved.filter(name => names.includes(name));
 }
+
 function saveActivePlaces(list){
   localStorage.setItem(FILTER_KEY, JSON.stringify(list));
   syncCloud();
@@ -466,6 +466,7 @@ function renderPlaceFilters(){
   if(!box) return;
   const active = activePlaces();
   box.innerHTML = "";
+
   places().forEach(place => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -474,18 +475,22 @@ function renderPlaceFilters(){
     btn.textContent = place.name;
     btn.onclick = () => {
       const currentActive = activePlaces();
-      let next;
-      if(currentActive.includes(place.name)){
-        next = currentActive.filter(name => name !== place.name);
-        if(next.length === 0) next = places().map(p => p.name);
-      }else{
-        next = [...currentActive, place.name];
-      }
+      const next = currentActive.includes(place.name)
+        ? currentActive.filter(name => name !== place.name)
+        : [...currentActive, place.name];
+
       saveActivePlaces(next);
       renderAll();
     };
     box.appendChild(btn);
   });
+
+  if(active.length === 0){
+    const note = document.createElement("div");
+    note.className = "filterNoneState";
+    note.textContent = "表示中の勤務先はありません。";
+    box.appendChild(note);
+  }
 }
 
 function renderAll(){
@@ -1074,5 +1079,9 @@ $("resetBtn").onclick = () => {
   renderAll();
 };
 
+if($("filterAllBtn")) $("filterAllBtn").onclick = () => {
+  saveActivePlaces(places().map(p => p.name));
+  renderAll();
+};
 setupAuth();
 renderAll();

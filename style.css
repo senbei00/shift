@@ -708,3 +708,23 @@ dialog::backdrop{background:rgba(15,20,30,.32)}
     border-left-color:var(--place-color) !important;
   }
 }
+
+/* === Filter v3: all off === */
+.filterActions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.filterActions button{
+  padding:5px 9px;
+  font-size:12px;
+  border-radius:999px;
+}
+.filterNoneState{
+  color:#a5acb8;
+  font-weight:800;
+  font-size:12px;
+  padding:8px 0;
+}
+
+/* === Filter v4: last chip can turn off all === */
