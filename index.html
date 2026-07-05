@@ -44,6 +44,14 @@
         <textarea id="monthMemo" rows="2" placeholder="今月の予定・注意事項など"></textarea>
       </div>
 
+      <div class="filterBox">
+        <div class="filterHead">
+          <span>表示する勤務先</span>
+          <button id="filterAllBtn" type="button">すべて</button>
+        </div>
+        <div id="placeFilterChips" class="filterChips"></div>
+      </div>
+
       <div class="weekLabels">
         <span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span>
       </div>
@@ -106,13 +114,33 @@
       </section>
 
       
-<section class="card accordion" data-section="data">
+
+<section class="card accordion" data-section="design">
+        <button type="button" class="accordionHead"><span>デザイン</span><span class="chev">⌄</span></button>
+        <div class="accordionBody">
+          <div class="designControls">
+            <label>カードの丸み <span id="radiusValue">18px</span>
+              <input id="radiusControl" type="range" min="8" max="28" step="1">
+            </label>
+            <label>余白 <span id="gapValue">16px</span>
+              <input id="gapControl" type="range" min="8" max="28" step="1">
+            </label>
+            <label>週末背景 <span id="weekendValue">2</span>
+              <input id="weekendControl" type="range" min="0" max="4" step="1">
+            </label>
+            <button id="designResetBtn" type="button">デザイン初期化</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card accordion" data-section="data">
         <button type="button" class="accordionHead"><span>データ</span><span class="chev">⌄</span></button>
         <div class="accordionBody">
           <div class="dataActions">
             <button id="backupBtn">バックアップ</button>
             <button id="importBtn" type="button" onclick="document.getElementById('importFile').click()">インポート</button>
             <button id="cloudSaveBtn" type="button">クラウドへ保存</button>
+            <button id="icsExportBtn" type="button">Appleカレンダー出力</button>
             <button id="resetBtn" class="danger">全データ削除</button>
           </div>
           <input id="importFile" type="file" accept="application/json,.json" onchange="window.handleImportFile && window.handleImportFile(this.files[0])" hidden>

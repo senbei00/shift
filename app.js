@@ -55,6 +55,8 @@ function collectLocalData(){
     presets: JSON.parse(localStorage.getItem("shift:presets") || "null"),
     wages: JSON.parse(localStorage.getItem("shift:wages") || "null"),
     accordion: JSON.parse(localStorage.getItem("shift:accordion") || "null"),
+    activePlaces: JSON.parse(localStorage.getItem(FILTER_KEY) || "null"),
+    design: JSON.parse(localStorage.getItem(DESIGN_KEY) || "null"),
     days,
     memos
   };
@@ -68,6 +70,9 @@ function applyCloudData(data){
   if(data.presets) localStorage.setItem("shift:presets", JSON.stringify(data.presets));
   if(data.wages) localStorage.setItem("shift:wages", JSON.stringify(data.wages));
   if(data.accordion) localStorage.setItem("shift:accordion", JSON.stringify(data.accordion));
+  if(data.activePlaces) localStorage.setItem(FILTER_KEY, JSON.stringify(data.activePlaces));
+  if(data.design) localStorage.setItem(DESIGN_KEY, JSON.stringify(data.design));
+  applyDesignSettings();
 
   Object.keys(localStorage).forEach(keyName => {
     if(keyName.startsWith("shift:20")) localStorage.removeItem(keyName);
@@ -180,6 +185,8 @@ const WAGE_KEY = "shift:wages";
 const ACCORDION_KEY = "shift:accordion";
 const DAY_PREFIX = "shift:";
 const MEMO_PREFIX = "shift:memo:";
+const FILTER_KEY = "shift:activePlaces";
+const DESIGN_KEY = "shift:design";
 
 const defaults = [
   { name:"いきいき", color:"#2f9e44" },
@@ -210,6 +217,110 @@ function saveMonthMemo(value){
   syncCloud();
 }
 
+
+
+
+function designSettings(){
+  return {
+    radius:18,
+    gap:16,
+    weekend:2,
+    ...(JSON.parse(localStorage.getItem(DESIGN_KEY) || "null") || {})
+  };
+}
+function saveDesignSettings(data){
+  localStorage.setItem(DESIGN_KEY, JSON.stringify(data));
+  applyDesignSettings();
+  syncCloud();
+}
+function weekendColors(level){
+  const map = [
+    { sat:"#ffffff", sun:"#ffffff" },
+    { sat:"#f4f8ff", sun:"#fff5f5" },
+    { sat:"#edf5ff", sun:"#fff0f0" },
+    { sat:"#e6f1ff", sun:"#ffe9e9" },
+    { sat:"#dfeeff", sun:"#ffe2e2" }
+  ];
+  return map[Number(level)] || map[2];
+}
+function applyDesignSettings(){
+  const data = designSettings();
+  const colors = weekendColors(data.weekend);
+  document.documentElement.style.setProperty("--user-card-radius", `${data.radius}px`);
+  document.documentElement.style.setProperty("--user-layout-gap", `${data.gap}px`);
+  document.documentElement.style.setProperty("--sat-bg", colors.sat);
+  document.documentElement.style.setProperty("--sun-bg", colors.sun);
+
+  if($("radiusControl")){
+    $("radiusControl").value = data.radius;
+    $("radiusValue").textContent = `${data.radius}px`;
+  }
+  if($("gapControl")){
+    $("gapControl").value = data.gap;
+    $("gapValue").textContent = `${data.gap}px`;
+  }
+  if($("weekendControl")){
+    $("weekendControl").value = data.weekend;
+    $("weekendValue").textContent = data.weekend;
+  }
+}
+function bindDesignControls(){
+  const radius = $("radiusControl");
+  const gap = $("gapControl");
+  const weekend = $("weekendControl");
+  const reset = $("designResetBtn");
+
+  if(radius){
+    radius.oninput = e => {
+      const data = designSettings();
+      data.radius = Number(e.target.value);
+      saveDesignSettings(data);
+    };
+  }
+  if(gap){
+    gap.oninput = e => {
+      const data = designSettings();
+      data.gap = Number(e.target.value);
+      saveDesignSettings(data);
+    };
+  }
+  if(weekend){
+    weekend.oninput = e => {
+      const data = designSettings();
+      data.weekend = Number(e.target.value);
+      saveDesignSettings(data);
+    };
+  }
+  if(reset){
+    reset.onclick = () => {
+      saveDesignSettings({ radius:18, gap:16, weekend:2 });
+      renderAll();
+    };
+  }
+}
+
+function activePlaces(){
+  const names = places().map(p => p.name);
+  const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || "null");
+  if(!Array.isArray(saved)) return names;
+  const filtered = saved.filter(name => names.includes(name));
+  return filtered.length ? filtered : names;
+}
+function saveActivePlaces(list){
+  localStorage.setItem(FILTER_KEY, JSON.stringify(list));
+  syncCloud();
+}
+function isPlaceActive(name){
+  return activePlaces().includes(name || "その他");
+}
+function visibleShifts(date){
+  return getShifts(date).filter(shift => isPlaceActive(shift.place || "その他"));
+}
+function shiftSalary(shift){
+  const wageData = wages();
+  const wage = Number(wageData[shift.place || "その他"] || 0);
+  return (workMinutes(shift) / 60) * wage;
+}
 
 function places(){ return JSON.parse(localStorage.getItem(PLACE_KEY) || "null") || defaults; }
 function savePlaces(list){ localStorage.setItem(PLACE_KEY, JSON.stringify(list)); syncCloud(); }
@@ -316,14 +427,10 @@ function saveDay(date, data){
   syncCloud();
 }
 function getShifts(date){ return loadDay(date).shifts; }
-function dayWork(date){ return getShifts(date).reduce((sum,s) => sum + workMinutes(s), 0); }
-function dayBreak(date){ return getShifts(date).reduce((sum,s) => sum + breakMinutes(s), 0); }
+function dayWork(date){ return visibleShifts(date).reduce((sum,s) => sum + workMinutes(s), 0); }
+function dayBreak(date){ return visibleShifts(date).reduce((sum,s) => sum + breakMinutes(s), 0); }
 function daySalary(date){
-  const wageData = wages();
-  return getShifts(date).reduce((sum, shift) => {
-    const wage = Number(wageData[shift.place || "その他"] || 0);
-    return sum + (workMinutes(shift) / 60) * wage;
-  }, 0);
+  return visibleShifts(date).reduce((sum, shift) => sum + shiftSalary(shift), 0);
 }
 
 function eachDate(start, end, callback){
@@ -440,7 +547,37 @@ function formatTimeInput(input){
   if(normalized) input.value = normalized;
 }
 
+
+function renderPlaceFilters(){
+  const box = $("placeFilterChips");
+  if(!box) return;
+  const active = activePlaces();
+  box.innerHTML = "";
+
+  places().forEach(place => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "filterChip" + (active.includes(place.name) ? "" : " off");
+    btn.style.setProperty("--chip-color", place.color);
+    btn.textContent = place.name;
+    btn.onclick = () => {
+      const currentActive = activePlaces();
+      let next;
+      if(currentActive.includes(place.name)){
+        next = currentActive.filter(name => name !== place.name);
+        if(next.length === 0) next = places().map(p => p.name);
+      }else{
+        next = [...currentActive, place.name];
+      }
+      saveActivePlaces(next);
+      renderAll();
+    };
+    box.appendChild(btn);
+  });
+}
+
 function renderAll(){
+  renderPlaceFilters();
   renderCalendar();
   renderSide();
   renderPlaceSettings();
@@ -482,12 +619,14 @@ function renderCalendar(){
     `;
 
     getShifts(date).forEach((shift,index) => {
+      if(!isPlaceActive(shift.place || "その他")) return;
       const p = placeByName(shift.place || "その他");
       const btn = document.createElement("button");
       const placeIndex = Math.max(0, places().findIndex(item => item.name === p.name));
       btn.className = `shiftChip place-${placeIndex}`;
       btn.style.borderLeftColor = p.color;
       btn.style.background = softColor(p.color);
+      btn.style.setProperty("--place-color", p.color);
       btn.style.setProperty("--place-color", p.color);
       btn.innerHTML = `<strong>${shift.start || "--:--"}-${shift.end || "--:--"}</strong>`;
       btn.onclick = e => {
@@ -516,6 +655,7 @@ function renderSide(){
   const list = $("selectedShiftList");
   list.innerHTML = "";
   getShifts(selected).forEach((shift,index) => {
+    if(!isPlaceActive(shift.place || "その他")) return;
     const p = placeByName(shift.place || "その他");
     const item = document.createElement("div");
     item.className = "shiftItem";
@@ -525,7 +665,7 @@ function renderSide(){
         <strong>${p.name}</strong>
         <small>${shift.start || "--:--"}-${shift.end || "--:--"}・休憩${breakMinutes(shift)}分${shift.memo ? "・" + shift.memo : ""}</small>
       </span>
-      <span><b>${minuteText(workMinutes(shift))}</b><br><button type="button" class="copyBtn">コピー</button></span>
+      <span><b>${minuteText(workMinutes(shift))}</b><br><span class="shiftPay">${yen(shiftSalary(shift))}</span><br><button type="button" class="copyBtn">コピー</button></span>
     `;
     item.onclick = () => openShift(index);
     item.querySelector(".copyBtn").onclick = e => {
@@ -561,6 +701,7 @@ function renderSide(){
   places().forEach(p => byPlace[p.name] = { work:0, break:0, color:p.color, wage:Number(wageData[p.name] || 0) });
   eachDate(mr.start, mr.end, date => {
     getShifts(date).forEach(shift => {
+      if(!isPlaceActive(shift.place || "その他")) return;
       const name = shift.place || "その他";
       const p = placeByName(name);
       if(!byPlace[name]) byPlace[name] = { work:0, break:0, color:p.color, wage:Number(wageData[name] || 0) };
@@ -829,6 +970,7 @@ function renderPlaceSettings(){
       const deletedName = list[index].name;
       list.splice(index,1);
       savePlaces(list);
+      saveActivePlaces(activePlaces().filter(name => name !== deletedName));
       const wageData = wages();
       delete wageData[deletedName];
       saveWages(wageData);
@@ -877,6 +1019,9 @@ function importBackupData(data){
   if(data.wages) localStorage.setItem(WAGE_KEY, JSON.stringify(data.wages));
   if(data.presets) localStorage.setItem(PRESET_KEY, JSON.stringify(data.presets));
   if(data.accordion) localStorage.setItem(ACCORDION_KEY, JSON.stringify(data.accordion));
+  if(data.activePlaces) localStorage.setItem(FILTER_KEY, JSON.stringify(data.activePlaces));
+  if(data.design) localStorage.setItem(DESIGN_KEY, JSON.stringify(data.design));
+  applyDesignSettings();
 
   if(data.days){
     Object.keys(localStorage).forEach(storageKey => {
@@ -926,10 +1071,16 @@ function initAccordions(){
 window.handleImportFile = handleImportFile;
 fillTimeOptions();
 initAccordions();
+  bindDesignControls();
+  applyDesignSettings();
 
 $("prevMonth").onclick = () => { current = new Date(current.getFullYear(),current.getMonth()-1,1); renderAll(); };
 $("nextMonth").onclick = () => { current = new Date(current.getFullYear(),current.getMonth()+1,1); renderAll(); };
 $("todayBtn").onclick = () => { current = startOfDay(new Date()); selected = startOfDay(new Date()); renderAll(); };
+  if($("filterAllBtn")) $("filterAllBtn").onclick = () => {
+    saveActivePlaces(places().map(p => p.name));
+    renderAll();
+  };
 $("openAddShift").onclick = () => openShift(null);
 $("closeDialog").onclick = () => $("shiftDialog").close();
 $("saveShift").onclick = saveShift;
@@ -956,6 +1107,7 @@ $("addPlace").onclick = () => {
 };
 $("backupBtn").onclick = backup;
 $("cloudSaveBtn").onclick = () => { syncCloud(); alert("現在のデータをクラウドへ保存しました。"); };
+  if($("icsExportBtn")) $("icsExportBtn").onclick = exportMonthIcs;
 $("importBtn").onclick = () => $("importFile").click();
 $("importFile").onchange = e => handleImportFile(e.target.files[0]);
 $("resetBtn").onclick = () => {
@@ -967,5 +1119,6 @@ $("resetBtn").onclick = () => {
   renderAll();
 };
 
+applyDesignSettings();
 setupAuth();
 renderAll();
